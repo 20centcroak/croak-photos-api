@@ -1,0 +1,174 @@
+swagger: "2.0"
+info:
+  description: "Croak photo API server.  You can find out more about     Croak photo at [croak photos on github](https://github.com/20centcroak/croak-photos-api) or at [photos.croak.fr](https://photos.croak.fr/)."
+  version: "1.0.0"
+  title: "Croak photos API"
+  license:
+    name: "GPL 3.0"
+    url: "https://www.gnu.org/licenses/gpl.html"
+host: "photos-api.croak.fr"
+basePath: "/v1"
+tags:
+- name: "collections"
+  description: "Manage photo collections"
+- name: "pictures"
+  description: "Manage pictures"
+- name: "user"
+  description: "Operations about user"
+schemes:
+- "https"
+paths:
+  /{user}/collections:
+    parameters:
+      - $ref: '#/parameters/user'
+    
+    get:
+      tags:
+      - "collections"
+      summary: "get collections"
+      description: "get all collections for the given user."
+      operationId: "getCollections"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Collections"
+          
+  /{user}/collection:
+    parameters:
+      - $ref: '#/parameters/user'
+      - $ref: '#/parameters/collectionName'
+    
+    get:
+      tags:
+      - "collections"
+      summary: "get collection"
+      description: "get collection for the given collection name."
+      operationId: "getCollection"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Collection"
+            
+  /{user}/collectionDefinition:
+    parameters:
+      - $ref: '#/parameters/user'
+      - $ref: '#/parameters/collectionName'
+    
+    get:
+      tags:
+      - "collections"
+      summary: "get collection definition"
+      description: "get collection definition for the given collection name."
+      operationId: "getCollectionDefinition"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CollectionDefinition"
+
+
+parameters:
+  user:
+    in: path
+    name: user
+    type: string
+    required: true
+    description: unic user name
+
+    
+  collectionName:
+    in: query
+    name: collectionName
+    type: string
+    required: true
+    description: collection name
+
+    
+definitions:
+
+  Collections:
+    type: array
+    items: 
+      type: string
+      example:
+        - week end in Paris
+        - holidays in Ireland
+        - kids
+  
+  Collection:
+    type: array
+    items:
+      type: string
+      example:
+        - paris.jpg
+        - DCI2473.jpg
+  
+      
+  CollectionDefinition:
+    type: object
+    description: a definition that groups items together
+    properties:
+      title: 
+        type: string
+      description: 
+        type: string
+      comments: 
+        type: string
+      coverImageUrl: 
+        type: string
+      condition:
+        $ref: "#/definitions/CollectionConditions"
+        
+  CollectionConditions:
+    type: object
+    description: a set of conditions to build a collection
+    properties:
+      orConditions:
+        items: 
+          $ref: '#/definitions/OrCondition'
+          
+  OrCondition:
+    type: object
+    description: condition set with "or" operator to build final condition
+    properties:
+      andConditions:
+        items:
+          $ref: '#/definitions/AndCondition'
+          
+  AndCondition:
+    type: object
+    description: condition set with "and" operator to build final condition
+    properties:
+      fieldName: 
+        type: string
+        example: "modification date"
+      fieldConditions:
+        type: array
+        items:
+          $ref: '#/definitions/Condition'
+          
+  Condition:
+    type: object
+    description: define a boolean condition associated to a given field with a target value
+    properties:
+      operator:
+        type: string
+        enum: [">", ">=", "<", "<=", "="]
+        example: ">="
+      fieldType:
+        type: string
+        enum: ["boolean", "date", "string", "number"]
+        example: "date"
+      target:
+        type: string
+        example: "21/05/2004"
+      
+      
