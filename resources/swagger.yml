@@ -17,6 +17,7 @@ tags:
   description: "Operations about user"
 schemes:
 - "https"
+
 paths:
   /{user}/collections:
     parameters:
@@ -54,6 +55,27 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Collection"
+    
+    post:
+      tags:
+      - "collections"
+      summary: "create a new collection"
+      description: "define a new collection by setting explicitly the image files composing this collection"
+      operationId: "createCollection"
+      consumes:
+        - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "list of image names"
+        required: true
+        schema:
+          $ref: "#/definitions/Collection"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid Collection"
             
   /{user}/collectionDefinition:
     parameters:
@@ -73,6 +95,27 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/CollectionDefinition"
+            
+    post:
+      tags:
+      - "collections"
+      summary: "create a new collection based on metadata"
+      description: "define a new collection thanks to conditions on metadata of images"
+      operationId: "createMetadataCollection"
+      consumes:
+        - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "collection definition"
+        required: true
+        schema:
+          $ref: "#/definitions/CollectionDefinition"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid Collection Definition"
 
 
 parameters:
@@ -118,57 +161,23 @@ definitions:
     properties:
       title: 
         type: string
+        example: "my hollidays in Sweden"
       description: 
         type: string
+        example: "family trip in August 2018"
       comments: 
         type: string
+        example: "sunny hollidays we enjoyed"
       coverImageUrl: 
         type: string
+        example: "SwedenFlag.jpg"
       condition:
-        $ref: "#/definitions/CollectionConditions"
+        $ref: "#/definitions/CollectionCondition"
         
-  CollectionConditions:
+  CollectionCondition:
     type: object
-    description: a set of conditions to build a collection
+    description: "define a boolean condition associated with a logical operation using metadata fields and associated target values, see [documentation](https://github.com/20centcroak/croak-photos-api/blob/master/resources/collectionConditionSyntax.md):  "
     properties:
-      orConditions:
-        items: 
-          $ref: '#/definitions/OrCondition'
-          
-  OrCondition:
-    type: object
-    description: condition set with "or" operator to build final condition
-    properties:
-      andConditions:
-        items:
-          $ref: '#/definitions/AndCondition'
-          
-  AndCondition:
-    type: object
-    description: condition set with "and" operator to build final condition
-    properties:
-      fieldName: 
+      condition:
         type: string
-        example: "modification date"
-      fieldConditions:
-        type: array
-        items:
-          $ref: '#/definitions/Condition'
-          
-  Condition:
-    type: object
-    description: define a boolean condition associated to a given field with a target value
-    properties:
-      operator:
-        type: string
-        enum: [">", ">=", "<", "<=", "="]
-        example: ">="
-      fieldType:
-        type: string
-        enum: ["boolean", "date", "string", "number"]
-        example: "date"
-      target:
-        type: string
-        example: "21/05/2004"
-      
-      
+        example: '[date > "25/05/2018"] & [date < "31/12/2018"] & [keyword = ("hollidays" | "christmas")]'
