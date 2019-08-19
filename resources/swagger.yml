@@ -13,8 +13,8 @@ tags:
   description: "Manage photo collections"
 - name: "pictures"
   description: "Manage pictures"
-- name: "user"
-  description: "Operations about user"
+- name: "users"
+  description: "Operations about users"
 schemes:
 - "https"
 
@@ -128,6 +128,7 @@ paths:
       - "pictures"
       consumes:
          - multipart/form-data
+      operationId: "addImage"
       parameters:
         - in: formData
           name: upfile
@@ -145,6 +146,32 @@ paths:
         400:
           description: invalid image
           
+  /{user}/pictures:
+    parameters: 
+      - $ref: '#/parameters/user'
+      
+    post:
+      summary: add images in the catalog
+      description: add multiple images in the catalog
+      tags:
+      - "pictures"
+      consumes:
+        - multipart/form-data
+      operationId: "addImages"
+      parameters:
+        - in: formData
+          name: files
+          type: array
+          items:
+            type: string
+            format: binary
+      responses:
+        200:
+          description: OK
+        400:
+          description: invalid image
+    
+          
   /{user}/{picture}:
     parameters: 
       - $ref: '#/parameters/user'
@@ -155,10 +182,11 @@ paths:
         description: name of file name
     
     get:
-      summary: get a single image
+      summary: download image
       description: get the mentionned image
       tags:
       - "pictures"
+      operationId: getImage
       produces:
         - image/png
         - image/gif
@@ -167,11 +195,70 @@ paths:
       responses:
         200:
           description: OK
+          
+  /user:
+    post:
+      summary: add a new user
+      description: add a new user in the user catalog
+      tags:
+      - "users"
+      consumes:
+      - "application/json"
+      operationId: createUser
+      parameters:
+        - in: "body"
+          name: user 
+          description: user details for account creation
+          required: true
+          schema:
+            $ref: '#/definitions/UserDetails'
+      responses:
+        200:
+          description: OK
+        403:
+          description: this service requires authentication as an administrator.
+  
+  /user/{user}:
+    parameters: 
+      - $ref: '#/parameters/user'
+      
+    get:
+      summary: get user details
+      description: get all pieces of information concerning the given user
+      tags:
+      - "users"
+      operationId: getUserDetails
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/UserDetails'
+        403:
+          description: this service requires authentication.
+          
+  /users:
+    get:
+      summary: get the list of user
+      description: list all users and associated details
+      produces: 
+      - "application/json"
+      operationId:
+        getUsers
+      tags:
+        - users
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserDetails'
+          
     
-        
     
-
-
+    
 parameters:
   user:
     in: path
@@ -180,7 +267,6 @@ parameters:
     required: true
     description: unique user name
 
-    
   collectionName:
     in: query
     name: collectionName
@@ -190,6 +276,23 @@ parameters:
 
     
 definitions:
+
+  UserDetails:
+    type: object
+    description: user details
+    properties: 
+      firstName:
+        type: string
+        example: "John"
+      lastName:
+        type: string
+        example: "Doe"
+      email:
+        type: string
+        example: "john.doe@mail.com"
+      pseudo:
+        type: string
+        example: joe
 
   Collections:
     type: array
