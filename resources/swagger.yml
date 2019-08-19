@@ -116,6 +116,60 @@ paths:
           description: "successful operation"
         400:
           description: "Invalid Collection Definition"
+          
+  /{user}/picture:
+    parameters: 
+      - $ref: '#/parameters/user'
+
+    post:
+      summary: "add an image in the catalog"
+      description: "add a new image"
+      tags:
+      - "pictures"
+      consumes:
+         - multipart/form-data
+      parameters:
+        - in: formData
+          name: upfile
+          type: file
+          required: true
+          description: The file to upload.
+        - in: formData
+          name: note
+          type: string
+          required: false
+          description: Description of file contents.
+      responses:
+        200:
+          description: OK
+        400:
+          description: invalid image
+          
+  /{user}/{picture}:
+    parameters: 
+      - $ref: '#/parameters/user'
+      - in: path
+        name: picture
+        type: string
+        required: true
+        description: name of file name
+    
+    get:
+      summary: get a single image
+      description: get the mentionned image
+      tags:
+      - "pictures"
+      produces:
+        - image/png
+        - image/gif
+        - image/jpeg
+        - image/tiff
+      responses:
+        200:
+          description: OK
+    
+        
+    
 
 
 parameters:
@@ -124,7 +178,7 @@ parameters:
     name: user
     type: string
     required: true
-    description: unic user name
+    description: unique user name
 
     
   collectionName:
